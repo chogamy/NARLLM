@@ -1,1 +1,1 @@
-python3 main.py --mode infer
+python main.py --mode infer

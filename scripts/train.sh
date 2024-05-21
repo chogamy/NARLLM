@@ -1,1 +1,4 @@
-python3 main.py --mode train
+python main.py \
+    --mode train \
+    --model EleutherAI/gpt-neo-125m \
+    --trainer_args basic.yaml
