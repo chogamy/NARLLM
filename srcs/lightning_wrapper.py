@@ -1,4 +1,5 @@
 import lightning as L
+from transformers import AutoModel, AutoTokenizer
 
 
 class LightningWrapper(L.LightningModule):
@@ -12,3 +13,12 @@ class LightningWrapper(L.LightningModule):
 
     def configure_optimizers(self):
         assert 0
+
+
+def get_model(args):
+    model = AutoModel.from_pretrained(args.model)
+    tokenizer = AutoTokenizer.from_pretrained(args.model)
+
+    model = LightningWrapper(model)
+
+    return model, tokenizer
