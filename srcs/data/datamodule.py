@@ -1,9 +1,7 @@
 import lightning as L
 from torch.utils.data import DataLoader
 
-from preprocess import PREPROCESS
-
-MODE_HF = {"fit"}
+from .preprocess import PREPROCESS
 
 
 class DataModule(L.LightningDataModule):
