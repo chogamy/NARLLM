@@ -1,11 +1,10 @@
-from datasets import load_dataset
+import os
+
+# from datasets import load_dataset, Dataset
 
 
-def conv_ai_2(split):
-    # where is split?
-    dataset = load_dataset("conv_ai_2", split=split)
-    # preprocess here
-    return dataset
+def ConvAI2(args):
+    pass
 
 
-PREPROCESS = {"conv_ai_2": conv_ai_2}
+PREPROCESS = {"ConvAI2": ConvAI2}
