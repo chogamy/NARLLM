@@ -47,8 +47,6 @@ def ConvAI2(split):
 
     dataset = Dataset.from_list(windows)
 
-    print(dataset)
-
     return dataset
 
 
