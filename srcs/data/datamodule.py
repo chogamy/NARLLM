@@ -2,6 +2,7 @@ import lightning as L
 from torch.utils.data import DataLoader
 
 from .preprocess import PREPROCESS
+from .load import LOAD
 
 
 class DataModule(L.LightningDataModule):
@@ -21,11 +22,11 @@ class DataModule(L.LightningDataModule):
 
     def setup(self, stage: str) -> None:
         if stage == "fit":
-            self.train = PREPROCESS[self.args.data]("train")
-            self.valid = PREPROCESS[self.args.data]("validation")
+            self.train = LOAD[self.args.data]("train")
+            self.valid = LOAD[self.args.data]("validation")
 
         if stage == "test":
-            self.test = PREPROCESS[self.args.data]("test")
+            self.test = LOAD[self.args.data]("test")
 
     def train_dataloader(self):
         return DataLoader(self.train, batch_size=self.args.batch_size)
@@ -43,7 +44,6 @@ class DataModule(L.LightningDataModule):
 
 def get_datamodule(args):
     dm = DataModule(args)
-    dm.prepare_data()
     dm.setup(args.mode)
 
     return dm
