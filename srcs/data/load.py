@@ -1,4 +1,5 @@
 import os
+import copy
 
 from datasets import load_dataset, Dataset
 
@@ -35,6 +36,7 @@ def ConvAI2(split):
             else:
                 text = line.split(" ", 1)[1]
                 text1, text2 = text.split("\t")
+
                 text1 = f"you: {text1}".strip()
                 text2 = f"partner: {text2}".strip()
                 window["dialogue"].append(text1)
@@ -45,7 +47,24 @@ def ConvAI2(split):
     # strip -> no \n on right
     # is OK?
 
-    dataset = Dataset.from_list(windows)
+    # check aug data
+    # 제대로 안된거같다
+    aug_windows = []
+    for window in windows:
+        base_window = {k: v for k, v in window.items()}
+        base_window["dialogue"] = base_window["dialogue"][:1]
+
+        rests = window["dialogue"][1:]
+
+        for rest in rests:
+            base_window["target"] = rest
+
+            aug_window = copy.deepcopy(base_window)
+
+            aug_windows.append(aug_window)
+            base_window["dialogue"].append(rest)
+
+    dataset = Dataset.from_list(aug_windows)
 
     return dataset
 
