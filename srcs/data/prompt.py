@@ -1,7 +1,1 @@
-PROMPT = {
-    "conv_ai_2": {
-        "task": "dialogue",
-        "input": "????",
-        "target": "????",
-    }
-}
+PROMPT = {"ConvAI2": "Generate a target for the length"}
