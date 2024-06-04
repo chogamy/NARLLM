@@ -1,8 +1,8 @@
 import argparse
 
-from lightning import Trainer
+from lightning import seed_everything
 
-from srcs.getter import get_model, get_datamodule
+from srcs.getter import get_model, get_datamodule, get_trainer
 
 
 if __name__ == "__main__":
@@ -20,15 +20,14 @@ if __name__ == "__main__":
     parser.add_argument("--data", required=True, default=None, type=str)
     args = parser.parse_args()
 
+    seed_everything(42, workers=True)
+
     model, tokenizer = get_model(args)
     dm = get_datamodule(args, tokenizer)
-
-    # maybe need get_trainer
-    trainer = Trainer()
+    trainer = get_trainer(args)
 
     if args.mode == "fit":
-        trainer.fit()
-        pass
+        trainer.fit(model=model, datamodule=dm)
 
     if args.mode == "test":
-        pass
+        trainer.test(model=model, datamodule=dm)

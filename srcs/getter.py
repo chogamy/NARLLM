@@ -1,3 +1,6 @@
+import yaml
+
+from lightning import Trainer
 from transformers import AutoModel, AutoTokenizer
 
 from srcs.data.datamodule import DataModule
@@ -12,6 +15,12 @@ def get_datamodule(args, tokenizer):
 
 
 def get_model(args):
+    if args.mode == "fit":
+        pass
+
+    if args.mode == "test":
+        pass
+
     model = AutoModel.from_pretrained(args.model)
     model = LightningWrapper(model)
 
@@ -20,3 +29,12 @@ def get_model(args):
         tokenizer.pad_token = tokenizer.eos_token
 
     return model, tokenizer
+
+
+def get_trainer(args):
+    with open(args.trainer_args) as f:
+        trainer_args = yaml.load(f)
+
+    trainer = Trainer(**trainer_args)
+
+    return trainer

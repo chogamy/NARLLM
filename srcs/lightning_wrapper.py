@@ -1,7 +1,5 @@
 import lightning as L
 
-# from transformers import AutoModel, AutoTokenizer
-
 
 class LightningWrapper(L.LightningModule):
     def __init__(self, model) -> None:
