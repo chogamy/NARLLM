@@ -21,9 +21,9 @@ if __name__ == "__main__":
     parser.add_argument("--data", required=True, default=None, type=str)
     args = parser.parse_args()
 
-    dm = get_datamodule(args)
-    raise NotImplementedError("yet")
     model, tokenizer = get_model(args)
+    dm = get_datamodule(args, tokenizer)
+    raise NotImplementedError("yet")
 
     # maybe need get_trainer
     trainer = Trainer()
