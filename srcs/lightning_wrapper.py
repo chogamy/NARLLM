@@ -8,6 +8,9 @@ class LightningWrapper(L.LightningModule):
 
         self.model = model
 
+    def forward(self):
+        assert 0
+
     def training_step(self):
         assert 0
 
@@ -17,8 +20,10 @@ class LightningWrapper(L.LightningModule):
 
 def get_model(args):
     model = AutoModel.from_pretrained(args.model)
-    tokenizer = AutoTokenizer.from_pretrained(args.model)
-
     model = LightningWrapper(model)
+
+    tokenizer = AutoTokenizer.from_pretrained(args.model)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
 
     return model, tokenizer
