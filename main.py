@@ -2,8 +2,7 @@ import argparse
 
 from lightning import Trainer
 
-from srcs.lightning_wrapper import get_model
-from srcs.data.datamodule import get_datamodule
+from srcs.getter import get_model, get_datamodule
 
 
 if __name__ == "__main__":
@@ -23,7 +22,6 @@ if __name__ == "__main__":
 
     model, tokenizer = get_model(args)
     dm = get_datamodule(args, tokenizer)
-    raise NotImplementedError("yet")
 
     # maybe need get_trainer
     trainer = Trainer()

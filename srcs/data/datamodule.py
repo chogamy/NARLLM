@@ -60,10 +60,3 @@ class DataModule(L.LightningDataModule):
     def predict_dataloader(self):
         # what's the difference between this and test?
         return DataLoader(self.test, batch_size=self.args.batch_size)
-
-
-def get_datamodule(args, tokenizer):
-    dm = DataModule(args)
-    dm.setup(args.mode, tokenizer)
-
-    return dm
