@@ -11,22 +11,42 @@ class DataModule(L.LightningDataModule):
 
         self.args = args
 
-        self.sys_prompt = None
+        self.prompt = "task1: predict the length of a target \ntask2: predict a target for the length"
 
-        # self.input_prompt = "1. Predict the target sequence length for input of the given task \ntask: {}\ninput: {} \ntarget length: {}"
-        # self.target_prompt = "2. Generate target for predicted length\ntarget: {}"
-        # self.context_prompt = ""
-
-    def prepare_data(self) -> None:
-        pass
-
-    def setup(self, stage: str) -> None:
+    def setup(self, stage: str, tokenizer) -> None:
         if stage == "fit":
             self.train = LOAD[self.args.data]("train")
             self.valid = LOAD[self.args.data]("validation")
 
+            self.train = self.train.map(
+                PREPROCESS[self.args.data],
+                remove_columns=[],
+                fn_kwargs={"tokenizer": tokenizer, "prompt": self.prompt},
+                load_from_cache_file=False,
+                desc="Pre-processing",
+                batched=True,
+            )
+
+            self.valid = self.valid.map(
+                PREPROCESS[self.args.data],
+                remove_columns=[],
+                fn_kwargs={"tokenizer": tokenizer, "prompt": self.prompt},
+                load_from_cache_file=False,
+                desc="Pre-processing",
+                batched=True,
+            )
+
         if stage == "test":
             self.test = LOAD[self.args.data]("test")
+
+            self.test = self.test.map(
+                PREPROCESS[self.args.data],
+                remove_columns=[],
+                fn_kwargs={"tokenizer": tokenizer, "prompt": self.prompt},
+                load_from_cache_file=False,
+                desc="Pre-processing",
+                batched=True,
+            )
 
     def train_dataloader(self):
         return DataLoader(self.train, batch_size=self.args.batch_size)
@@ -42,8 +62,8 @@ class DataModule(L.LightningDataModule):
         return DataLoader(self.test, batch_size=self.args.batch_size)
 
 
-def get_datamodule(args):
+def get_datamodule(args, tokenizer):
     dm = DataModule(args)
-    dm.setup(args.mode)
+    dm.setup(args.mode, tokenizer)
 
     return dm
