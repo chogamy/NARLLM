@@ -16,7 +16,6 @@ if __name__ == "__main__":
     )
     parser.add_argument("--model", required=True, default=None, type=str)
     parser.add_argument("--trainer_args", default="args/trainer/basic.yaml", type=str)
-    parser.add_argument("--batch_size", default=32, type=int)
     parser.add_argument("--data", required=True, default=None, type=str)
     args = parser.parse_args()
 
