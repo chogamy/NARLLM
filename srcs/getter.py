@@ -10,8 +10,8 @@ from srcs.lightning_wrapper import LightningWrapper
 
 
 def get_datamodule(args, tokenizer):
-    dm = DataModule(args)
-    dm.setup(args.mode, tokenizer)
+    dm = DataModule(args, tokenizer)
+    dm.setup(args.mode)
 
     return dm
 
@@ -42,14 +42,13 @@ def get_model(args):
         """
         load from ckpt
         """
-        pass
 
     return model, tokenizer
 
 
 def get_trainer(args):
     with open(args.trainer_args) as f:
-        trainer_args = yaml.load(f)
+        trainer_args = yaml.load(f, Loader=yaml.FullLoader)
 
     trainer = Trainer(**trainer_args)
 

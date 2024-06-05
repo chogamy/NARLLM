@@ -9,14 +9,14 @@ from .load import LOAD
 
 
 class DataModule(L.LightningDataModule):
-    def __init__(self, args) -> None:
+    def __init__(self, args, tokenizer) -> None:
         super().__init__()
 
         self.args = args
-
+        self.tokenizer = tokenizer
         self.prompt = "task1: predict the length of a target \ntask2: predict a target for the length"
 
-    def setup(self, stage: str, tokenizer) -> None:
+    def setup(self, stage) -> None:
         if stage == "fit":
             dir = os.path.join(os.getcwd(), "data", self.args.data, "cache")
 
@@ -30,7 +30,7 @@ class DataModule(L.LightningDataModule):
                 self.train = self.train.map(
                     PREPROCESS[self.args.data],
                     remove_columns=[],
-                    fn_kwargs={"tokenizer": tokenizer, "prompt": self.prompt},
+                    fn_kwargs={"tokenizer": self.tokenizer, "prompt": self.prompt},
                     load_from_cache_file=True,
                     keep_in_memory=True,
                     desc="Pre-processing",
@@ -49,7 +49,7 @@ class DataModule(L.LightningDataModule):
                 self.valid = self.valid.map(
                     PREPROCESS[self.args.data],
                     remove_columns=[],
-                    fn_kwargs={"tokenizer": tokenizer, "prompt": self.prompt},
+                    fn_kwargs={"tokenizer": self.tokenizer, "prompt": self.prompt},
                     load_from_cache_file=True,
                     keep_in_memory=True,
                     desc="Pre-processing",
@@ -64,7 +64,7 @@ class DataModule(L.LightningDataModule):
             self.test = self.test.map(
                 PREPROCESS[self.args.data],
                 remove_columns=[],
-                fn_kwargs={"tokenizer": tokenizer, "prompt": self.prompt},
+                fn_kwargs={"tokenizer": self.tokenizer, "prompt": self.prompt},
                 load_from_cache_file=False,
                 desc="Pre-processing",
                 batched=True,
