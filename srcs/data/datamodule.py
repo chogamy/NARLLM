@@ -20,6 +20,13 @@ class DataModule(L.LightningDataModule):
         if stage == "fit":
             dir = os.path.join(os.getcwd(), "data", self.args.data, "cache")
 
+            remove_columns = [
+                "your persona:",
+                "partner's persona:",
+                "dialogue",
+                "target",
+            ]
+
             # train set
             if os.path.exists(os.path.join(dir, "train")):
                 self.train = load_from_disk(os.path.join(dir, "train"))
@@ -29,7 +36,7 @@ class DataModule(L.LightningDataModule):
 
                 self.train = self.train.map(
                     PREPROCESS[self.args.data],
-                    remove_columns=[],
+                    remove_columns=remove_columns,
                     fn_kwargs={"tokenizer": self.tokenizer, "prompt": self.prompt},
                     load_from_cache_file=True,
                     keep_in_memory=True,
@@ -48,7 +55,7 @@ class DataModule(L.LightningDataModule):
 
                 self.valid = self.valid.map(
                     PREPROCESS[self.args.data],
-                    remove_columns=[],
+                    remove_columns=remove_columns,
                     fn_kwargs={"tokenizer": self.tokenizer, "prompt": self.prompt},
                     load_from_cache_file=True,
                     keep_in_memory=True,
@@ -71,14 +78,22 @@ class DataModule(L.LightningDataModule):
             )
 
     def train_dataloader(self):
-        return DataLoader(self.train, batch_size=self.args.batch_size)
+        return DataLoader(
+            self.train, batch_size=self.args.trainer_args["limit_train_batches"]
+        )
 
     def val_dataloader(self):
-        return DataLoader(self.valid, batch_size=self.args.batch_size)
+        return DataLoader(
+            self.valid, batch_size=self.args.trainer_args["limit_val_batches"]
+        )
 
     def test_dataloader(self):
-        return DataLoader(self.test, batch_size=self.args.batch_size)
+        return DataLoader(
+            self.test, batch_size=self.args.trainer_args["limit_test_batches"]
+        )
 
     def predict_dataloader(self):
         # what's the difference between this and test?
-        return DataLoader(self.test, batch_size=self.args.batch_size)
+        return DataLoader(
+            self.test, batch_size=self.args.trainer_args["limit_predict_batches"]
+        )
