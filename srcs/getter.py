@@ -9,6 +9,12 @@ from srcs.data.datamodule import DataModule
 from srcs.lightning_wrapper import LightningWrapper
 
 
+def get_args(args):
+    with open(args.trainer_args) as f:
+        args.trainer_args = yaml.load(f, Loader=yaml.FullLoader)
+    return args
+
+
 def get_datamodule(args, tokenizer):
     dm = DataModule(args, tokenizer)
     dm.setup(args.mode)
@@ -47,9 +53,6 @@ def get_model(args):
 
 
 def get_trainer(args):
-    with open(args.trainer_args) as f:
-        trainer_args = yaml.load(f, Loader=yaml.FullLoader)
-
-    trainer = Trainer(**trainer_args)
+    trainer = Trainer(**args.trainer_args)
 
     return trainer
