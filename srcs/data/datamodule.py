@@ -1,3 +1,6 @@
+import os
+
+from datasets import load_from_disk
 import lightning as L
 from torch.utils.data import DataLoader
 
@@ -15,26 +18,45 @@ class DataModule(L.LightningDataModule):
 
     def setup(self, stage: str, tokenizer) -> None:
         if stage == "fit":
-            self.train = LOAD[self.args.data]("train")
-            self.valid = LOAD[self.args.data]("validation")
+            dir = os.path.join(os.getcwd(), "data", self.args.data, "cache")
 
-            self.train = self.train.map(
-                PREPROCESS[self.args.data],
-                remove_columns=[],
-                fn_kwargs={"tokenizer": tokenizer, "prompt": self.prompt},
-                load_from_cache_file=True,
-                desc="Pre-processing",
-                batched=True,
-            )
+            # train set
+            if os.path.exists(os.path.join(dir, "train")):
+                self.train = load_from_disk(os.path.join(dir, "train"))
+            else:
+                os.makedirs(os.path.join(dir, "train"), exist_ok=True)
+                self.train = LOAD[self.args.data]("train")
 
-            self.valid = self.valid.map(
-                PREPROCESS[self.args.data],
-                remove_columns=[],
-                fn_kwargs={"tokenizer": tokenizer, "prompt": self.prompt},
-                load_from_cache_file=True,
-                desc="Pre-processing",
-                batched=True,
-            )
+                self.train = self.train.map(
+                    PREPROCESS[self.args.data],
+                    remove_columns=[],
+                    fn_kwargs={"tokenizer": tokenizer, "prompt": self.prompt},
+                    load_from_cache_file=True,
+                    keep_in_memory=True,
+                    desc="Pre-processing",
+                    batched=True,
+                )
+
+                self.train.save_to_disk(os.path.join(dir, "train"))
+
+            # valid set
+            if os.path.exists(os.path.join(dir, "valid")):
+                self.valid = load_from_disk(os.path.join(dir, "valid"))
+            else:
+                os.makedirs(os.path.join(dir, "valid"), exist_ok=True)
+                self.valid = LOAD[self.args.data]("validation")
+
+                self.valid = self.valid.map(
+                    PREPROCESS[self.args.data],
+                    remove_columns=[],
+                    fn_kwargs={"tokenizer": tokenizer, "prompt": self.prompt},
+                    load_from_cache_file=True,
+                    keep_in_memory=True,
+                    desc="Pre-processing",
+                    batched=True,
+                )
+
+                self.valid.save_to_disk(os.path.join(dir, "valid"))
 
         if stage == "test":
             self.test = LOAD[self.args.data]("test")
