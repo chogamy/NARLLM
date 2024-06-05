@@ -41,7 +41,7 @@ class LightningWrapper(L.LightningModule):
         model_input = {}
         target = {}
 
-        outputs = self.model.nar_predict(model_input)
+        outputs = self.nar_predict(model_input)
 
         result = self.metric(outputs, target)
 
@@ -52,7 +52,7 @@ class LightningWrapper(L.LightningModule):
         model_input = {}
         target = {}
 
-        outputs = self.model.nar_predict(model_input)
+        outputs = self.nar_predict(model_input)
 
         result = self.metric(outputs, target)
 

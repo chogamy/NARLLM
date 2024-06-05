@@ -2,6 +2,7 @@ import yaml
 
 from lightning import Trainer
 from transformers import AutoModel, AutoTokenizer
+from peft import PeftConfig, PeftModel, LoraConfig, get_peft_model
 
 from srcs.data.metric import METRIC
 from srcs.data.datamodule import DataModule
@@ -16,20 +17,32 @@ def get_datamodule(args, tokenizer):
 
 
 def get_model(args):
+    # tokenizer
     tokenizer = AutoTokenizer.from_pretrained(args.model)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
+    # model
     model = AutoModel.from_pretrained(args.model)
+
+    if args.peft == "lora":
+        peft_config = LoraConfig()
+
+        model = get_peft_model(model, peft_config)
 
     metric = METRIC[args.data]()
 
     if args.mode == "fit":
-        pass
+        model = LightningWrapper(model, tokenizer, metric)
 
     if args.mode == "test":
+        path = None
+        model = PeftModel.from_pretrained(model, path)
+        model = model.merge_and_unload()
+        """
+        load from ckpt
+        """
         pass
-    model = LightningWrapper(model, tokenizer, metric)
 
     return model, tokenizer
 

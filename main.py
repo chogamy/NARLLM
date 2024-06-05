@@ -17,6 +17,7 @@ if __name__ == "__main__":
     parser.add_argument("--model", required=True, default=None, type=str)
     parser.add_argument("--trainer_args", default="args/trainer/basic.yaml", type=str)
     parser.add_argument("--data", required=True, default=None, type=str)
+    parser.add_argument("--peft", default=None, type=str)
     args = parser.parse_args()
 
     seed_everything(42, workers=True)
