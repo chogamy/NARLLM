@@ -22,7 +22,7 @@ class DataModule(L.LightningDataModule):
                 PREPROCESS[self.args.data],
                 remove_columns=[],
                 fn_kwargs={"tokenizer": tokenizer, "prompt": self.prompt},
-                load_from_cache_file=False,
+                load_from_cache_file=True,
                 desc="Pre-processing",
                 batched=True,
             )
@@ -31,7 +31,7 @@ class DataModule(L.LightningDataModule):
                 PREPROCESS[self.args.data],
                 remove_columns=[],
                 fn_kwargs={"tokenizer": tokenizer, "prompt": self.prompt},
-                load_from_cache_file=False,
+                load_from_cache_file=True,
                 desc="Pre-processing",
                 batched=True,
             )
