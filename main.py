@@ -2,7 +2,7 @@ import argparse
 
 from lightning import seed_everything
 
-from srcs.getter import get_model, get_datamodule, get_trainer
+from srcs.getter import get_args, get_model, get_datamodule, get_trainer
 
 
 if __name__ == "__main__":
@@ -22,6 +22,7 @@ if __name__ == "__main__":
 
     seed_everything(42, workers=True)
 
+    args = get_args(args)
     model, tokenizer = get_model(args)
     dm = get_datamodule(args, tokenizer)
     trainer = get_trainer(args)
