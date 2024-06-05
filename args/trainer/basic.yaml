@@ -33,7 +33,7 @@ plugins: null
 precision: null
 profiler: null
 reload_dataloaders_every_n_epochs: 0
-strategy: auto
+strategy: deepspeed_stage_1
 sync_batchnorm: false
 use_distributed_sampler: true
 val_check_interval: null
