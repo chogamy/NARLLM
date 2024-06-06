@@ -1,7 +1,7 @@
 import yaml
 
 from lightning import Trainer
-from transformers import AutoModel, AutoTokenizer
+from transformers import AutoModel, AutoTokenizer, AutoConfig, AutoModelWithLMHead
 from peft import PeftConfig, PeftModel, LoraConfig, get_peft_model
 
 from srcs.data.metric import METRIC
@@ -29,7 +29,9 @@ def get_model(args):
         tokenizer.pad_token = tokenizer.eos_token
 
     # model
-    model = AutoModel.from_pretrained(args.model)
+    # model = AutoModel.from_pretrained(args.model)
+    model = AutoModelWithLMHead.from_pretrained(args.model)
+    config = AutoConfig.from_pretrained(args.model)
 
     if args.peft == "lora":
         peft_config = LoraConfig()
@@ -39,7 +41,7 @@ def get_model(args):
     metric = METRIC[args.data]()
 
     if args.mode == "fit":
-        model = LightningWrapper(model, tokenizer, metric)
+        model = LightningWrapper(model, config, tokenizer, metric)
 
     if args.mode == "test":
         path = None
