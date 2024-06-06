@@ -1,7 +1,7 @@
 import yaml
 
 from lightning import Trainer
-from transformers import AutoModel, AutoTokenizer, AutoConfig, AutoModelWithLMHead
+from transformers import AutoTokenizer, AutoConfig, AutoModelForCausalLM
 from peft import PeftConfig, PeftModel, LoraConfig, get_peft_model
 
 from srcs.data.metric import METRIC
@@ -30,7 +30,7 @@ def get_model(args):
 
     # model
     # model = AutoModel.from_pretrained(args.model)
-    model = AutoModelWithLMHead.from_pretrained(args.model)
+    model = AutoModelForCausalLM.from_pretrained(args.model)
     config = AutoConfig.from_pretrained(args.model)
 
     if args.peft == "lora":
