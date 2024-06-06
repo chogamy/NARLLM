@@ -1,4 +1,4 @@
-def ConvAI2(batch, tokenizer, prompt):
+def ConvAI2(batch, tokenizer, prompt, split):
     yours_batch = [
         "your persona: " + " ".join(persona) for persona in batch["your persona:"]
     ]
@@ -37,33 +37,60 @@ def ConvAI2(batch, tokenizer, prompt):
 
     """
     update input
-    input: [b] [p] [l]
+    input: [bos] [p] [l]
     """
     inputs = [
         f"{inp}{len(tokenizer(tgt, padding=False, truncation=False)['input_ids'])} "
         for inp, tgt in zip(inputs, tgt_batch)
     ]
 
-    """
-    input:  [bos]	[p] [l] [mask]	
-    target:                 [tgt]	
-    """
-    target_batch = tokenizer(
-        [
-            f"{tokenizer.bos_token}{inp}{tokenizer.bos_token * len(tokenizer(tgt, padding=False, truncation=False)['input_ids'])}"
-            for inp, tgt in zip(inputs, tgt_batch)
-        ],
-        padding="max_length",
-        truncation=True,
-        max_length=int(tokenizer.model_max_length / 2),
-    )
+    
+    if split == "train":
+        """
+        input:  [bos]	[p] [l]     [mask]	
+        target: [p]     [l] [sep]   [tgt]	
+        """
+        target_batch = tokenizer(
+            [
+                f"{tokenizer.bos_token}{inp}{tokenizer.bos_token * len(tokenizer(tgt, padding=False, truncation=False)['input_ids'])}"
+                for inp, tgt in zip(inputs, tgt_batch)
+            ],
+            padding="max_length",
+            truncation=True,
+            max_length=int(tokenizer.model_max_length / 2),
+        )
 
-    target_batch["target"] = tokenizer(
-        [f"{tgt}" for tgt in tgt_batch],
-        padding="max_length",
-        truncation=True,
-        max_length=int(tokenizer.model_max_length / 2),
-    )["input_ids"]
+        target_batch["target"] = tokenizer(
+            [
+                f"{inp}{tokenizer.sep_token}{tgt}"
+                for inp, tgt in zip(inputs, tgt_batch)
+            ],
+            padding="max_length",
+            truncation=True,
+            max_length=int(tokenizer.model_max_length / 2),
+        )["input_ids"]
+    else:
+        """
+        input:  [bos]	[p] [l]     [mask]	
+        target:                     [tgt]	
+        """
+        
+        target_batch = tokenizer(
+            [
+                f"{tokenizer.bos_token}{inp}{tokenizer.bos_token * len(tokenizer(tgt, padding=False, truncation=False)['input_ids'])}"
+                for inp, tgt in zip(inputs, tgt_batch)
+            ],
+            padding="max_length",
+            truncation=True,
+            max_length=int(tokenizer.model_max_length / 2),
+        )
+
+        target_batch["target"] = tokenizer(
+            [f"{tgt}" for tgt in tgt_batch],
+            padding="max_length",
+            truncation=True,
+            max_length=int(tokenizer.model_max_length / 2),
+        )["input_ids"]
 
     length_input = {f"length_{k}": v for k, v in length_batch.items()}
     target_input = {f"target_{k}": v for k, v in target_batch.items()}

@@ -50,7 +50,7 @@ class DataModule(L.LightningDataModule):
                 self.train = self.train.map(
                     PREPROCESS[self.args.data],
                     remove_columns=remove_columns,
-                    fn_kwargs={"tokenizer": self.tokenizer, "prompt": self.prompt},
+                    fn_kwargs={"tokenizer": self.tokenizer, "prompt": self.prompt, "split":"train"},
                     load_from_cache_file=True,
                     keep_in_memory=True,
                     desc="Pre-processing",
@@ -69,7 +69,7 @@ class DataModule(L.LightningDataModule):
                 self.valid = self.valid.map(
                     PREPROCESS[self.args.data],
                     remove_columns=remove_columns,
-                    fn_kwargs={"tokenizer": self.tokenizer, "prompt": self.prompt},
+                    fn_kwargs={"tokenizer": self.tokenizer, "prompt": self.prompt, "split":"valid"},
                     load_from_cache_file=True,
                     keep_in_memory=True,
                     desc="Pre-processing",
@@ -82,13 +82,14 @@ class DataModule(L.LightningDataModule):
             self.test = LOAD[self.args.data]("test")
 
             self.test = self.test.map(
-                PREPROCESS[self.args.data],
-                remove_columns=[],
-                fn_kwargs={"tokenizer": self.tokenizer, "prompt": self.prompt},
-                load_from_cache_file=False,
-                desc="Pre-processing",
-                batched=True,
-            )
+                    PREPROCESS[self.args.data],
+                    remove_columns=remove_columns,
+                    fn_kwargs={"tokenizer": self.tokenizer, "prompt": self.prompt, "split":"test"},
+                    load_from_cache_file=True,
+                    keep_in_memory=True,
+                    desc="Pre-processing",
+                    batched=True,
+                )
 
     def train_dataloader(self):
         return DataLoader(
