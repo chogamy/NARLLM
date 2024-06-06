@@ -59,10 +59,13 @@ class LightningWrapper(L.LightningModule):
             padding=False,
             truncation=False,
         )["input_ids"]
-        # TODO
-        # {str(length)}, {length*self.tokenizer.eos_token} respectively!
-        # to extract only predicted tokens for masked part
 
+        # to find real start id
+        length_ids = self.tokenizer(
+            [f"{str(length)}" for length in lengths],
+            padding=False,
+            truncation=False,
+        )["input_ids"]
         start_end_ids = []
 
         # insert mask tokens
@@ -73,14 +76,14 @@ class LightningWrapper(L.LightningModule):
 
             if end > l:
                 new_input_ids = torch.cat([batch["input_ids"][i][:start], mask])
-                new_input_ids = new_input_ids[-l:]
+                new_input_ids = new_input_ids[end - l :]
                 batch["input_ids"][i] = new_input_ids
                 batch["attention_mask"][i][:] = 1
-                start_end_ids.append((end - 1, l))
+                start_end_ids.append((0 + len(length_ids[i]), l))
             else:
                 batch["input_ids"][i][start:end] = mask
                 batch["attention_mask"][i][start:end] = 1
-                start_end_ids.append((start, end))
+                start_end_ids.append((start + len(length_ids[i]), end))
 
         outputs = self.model(**batch)
 
@@ -103,9 +106,22 @@ class LightningWrapper(L.LightningModule):
             if "length_" in k:
                 model_input[k.replace("length_", "")] = v
 
-        target = model_input.pop("target")
+        _ = model_input.pop("target")
 
         outputs = self.nar_predict(model_input)
+
+        target = batch["target_target"]
+
+        target_sequences = [
+            self.tokenizer.decode(t, skip_special_tokens=True) for t in target
+        ]
+
+        for t, p in zip(target_sequences, outputs["sequences"]):
+            print(f"answer: {t}")
+            print(f"predict: {p}")
+
+        # TODO1: make target.... again....
+        # TODO2: define metric...
 
         assert 0
 
