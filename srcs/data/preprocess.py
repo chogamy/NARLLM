@@ -13,15 +13,15 @@ def ConvAI2(batch, tokenizer, prompt):
     tgt_batch = batch["target"]
 
     inputs = [
-        f"{prompt} {yours} {partners} {dialogue} length: "
-        for yours, partners, dialogue, tgt in zip(
-            yours_batch, partners_batch, dialogue_batch, tgt_batch
+        f"{prompt}\n{yours}\n{partners}\n{dialogue}\nlength: "
+        for yours, partners, dialogue in zip(
+            yours_batch, partners_batch, dialogue_batch
         )
     ]
 
     """
-    input:  [bos]	[p]	        [length]
-    target: [p]	    [length]	[eos]
+    input:  [bos]	[p]
+    target:         [l]    
     """
     length_batch = tokenizer(
         [f"{tokenizer.bos_token}{inp}" for inp in inputs],
@@ -35,18 +35,22 @@ def ConvAI2(batch, tokenizer, prompt):
         for tgt in tgt_batch
     ]
 
+    """
+    update input
+    input: [b] [p] [l]
+    """
     inputs = [
         f"{inp}{len(tokenizer(tgt, padding=False, truncation=False)['input_ids'])} "
         for inp, tgt in zip(inputs, tgt_batch)
     ]
 
     """
-    input:  [bos]	[p]	        [length]	[mask]	[eos]
-    target: [p]	    [length]	[eos]	    [tgt]	[eos]
+    input:  [bos]	[p] [l] [mask]	
+    target:                 [tgt]	
     """
     target_batch = tokenizer(
         [
-            f"{tokenizer.bos_token}{inp}{tokenizer.bos_token * len(tokenizer(tgt, padding=False, truncation=False)['input_ids'])}{tokenizer.eos_token}"
+            f"{tokenizer.bos_token}{inp}{tokenizer.bos_token * len(tokenizer(tgt, padding=False, truncation=False)['input_ids'])}"
             for inp, tgt in zip(inputs, tgt_batch)
         ],
         padding="max_length",
@@ -55,10 +59,7 @@ def ConvAI2(batch, tokenizer, prompt):
     )
 
     target_batch["target"] = tokenizer(
-        [
-            f"{inp}{tokenizer.eos_token}{tgt}{tokenizer.eos_token}"
-            for inp, tgt in zip(inputs, tgt_batch)
-        ],
+        [f"{tgt}" for tgt in tgt_batch],
         padding="max_length",
         truncation=True,
         max_length=int(tokenizer.model_max_length / 2),
