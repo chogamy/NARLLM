@@ -1,11 +1,24 @@
 import os
 
+import torch
+from dataclasses import dataclass
 from datasets import load_from_disk
 import lightning as L
 from torch.utils.data import DataLoader
 
 from .preprocess import PREPROCESS
 from .load import LOAD
+
+
+@dataclass
+class Collator:
+    def __call__(self, features):
+        # features: list of dict
+        batch = {}
+        for key in features[0].keys():
+            batch[key] = torch.tensor([feature[key] for feature in features])
+
+        return batch
 
 
 class DataModule(L.LightningDataModule):
@@ -79,21 +92,29 @@ class DataModule(L.LightningDataModule):
 
     def train_dataloader(self):
         return DataLoader(
-            self.train, batch_size=self.args.trainer_args["limit_train_batches"]
+            self.train,
+            collate_fn=Collator(),
+            batch_size=self.args.trainer_args["limit_train_batches"],
         )
 
     def val_dataloader(self):
         return DataLoader(
-            self.valid, batch_size=self.args.trainer_args["limit_val_batches"]
+            self.valid,
+            collate_fn=Collator(),
+            batch_size=self.args.trainer_args["limit_val_batches"],
         )
 
     def test_dataloader(self):
         return DataLoader(
-            self.test, batch_size=self.args.trainer_args["limit_test_batches"]
+            self.test,
+            collate_fn=Collator(),
+            batch_size=self.args.trainer_args["limit_test_batches"],
         )
 
     def predict_dataloader(self):
         # what's the difference between this and test?
         return DataLoader(
-            self.test, batch_size=self.args.trainer_args["limit_predict_batches"]
+            self.test,
+            collate_fn=Collator(),
+            batch_size=self.args.trainer_args["limit_predict_batches"],
         )
